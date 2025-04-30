@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pi Camera Stream</title>
+    <style>
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        :root {
+            --background: #121212;
+            --text: #f0f0f0;
+        }
+        .light-mode {
+            --background: #f0f2f5;
+            --text: #222;
+        }
+        img {
+            width: 90%;
+            max-width: 1000px;
+            border: 4px solid #4CAF50;
+            border-radius: 12px;
+        }
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .spinner {
+            margin-top: 20px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg);}
+            100% { transform: rotate(360deg);}
+        }
+        #fps {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Raspberry Pi Webcam</h1>
+
+    <div class="spinner" id="loadingSpinner"></div>
+    <img id="cameraFeed" src="{{ url_for('video_feed') }}" alt="Camera Stream" style="display:none;">
+
+    <div id="fps">FPS: {{ fps }}</div>
+
+    <div class="button-container">
+        <form action="{{ url_for('logout') }}" method="POST">
+            <button type="submit">Logout</button>
+        </form>
+        <form action="{{ url_for('flip') }}" method="POST">
+            <button type="submit">Flip Horizontal</button>
+        </form>
+        <button onclick="toggleTheme()">Toggle Theme</button>
+    </div>
+
+    <script>
+    function toggleTheme() {
+        document.body.classList.toggle('light-mode');
+    }
+
+
+    const img = document.getElementById('cameraFeed');
+    const spinner = document.getElementById('loadingSpinner');
+
+    img.onload = function() {
+        spinner.style.display = 'none';
+        img.style.display = 'block';
+    };
+
+    setInterval(function() {
+        fetch('/fps')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('fps').innerText = "FPS: " + data;
+        });
+    }, 1000);
+    </script>
+</body>
+</html>
